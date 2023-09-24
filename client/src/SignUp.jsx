@@ -70,7 +70,7 @@ function SignUp(){
                 </form>
                 <p>Already Have an account</p>
                 <Link to ='/login' className='btn btn-default border w-100 bg-light rounded-0 text-decoration-none'>
-                    <button>Login</button>
+                    Login
                 </Link>
           </div>
     </div>

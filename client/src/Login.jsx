@@ -13,8 +13,12 @@ function Login(){
       e.preventDefault()
       axios.post('http://localhost:3000/login',{ email, password})
       .then(result => {console.log(result)
-        if(result.data == "Success"){
-           navigate('/home')
+        if(result.data.Status === "Success"){
+           if(result.data.role === "admin"){
+                navigate('/dashboard')
+           }else{
+                navigate('/home')
+           }
         }
       })
       .catch(err => console.log(err))
@@ -57,7 +61,7 @@ function Login(){
                 </form>
                 <p>Don't Have an account</p>
                 <Link to ='/register' className='btn btn-default border w-100 bg-light rounded-0 text-decoration-none'>
-                    <button>Register</button>
+                    Register
                 </Link>
           </div>
     </div>

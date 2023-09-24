@@ -30,8 +30,34 @@ const verifyUser = (req, res, next) =>{
     }
 }
 
+const verifyUserForDashboard = (req, res, next) =>{
+    const token = req.cookies.token;
+    if(!token) {
+        return res.json("The token is not available")
+    }
+    else{
+        jwt.verify(token, "jwt-secret-key", (err, decoded) => {
+            if(err){
+                return res.json("Token is wrong")
+            }else{
+                if(decoded.role === "admin"){
+                    next();
+                }
+                else{
+                    return res.json("not admin")
+                }
+            }
+            next();
+        })
+    }
+}
+
 app.get('/home', verifyUser, (req,res) => {
      return res.json("Success")
+})
+
+app.get('/dashboard', verifyUserForDashboard, (req,res) => {
+    return res.json("Success")
 })
  
 app.post('/login', (req,res)=>{
@@ -41,9 +67,9 @@ app.post('/login', (req,res)=>{
             if(user){
                 bcrypt.compare(password, user.password, (err,response) =>{
                 if(response){
-                    const token = jwt.sign({email: user.email, userId: user.userId}, "jwt-secret-key", {expiresIn: "1d"})
+                    const token = jwt.sign({email: user.email, userId: user.userId, role: user.role}, "jwt-secret-key", {expiresIn: "1d"})
                     res.cookie("token", token);
-                    res.json("Success")
+                    return res.json({Status: "Success", role: user.role})
                 }
                 else{
                     res.json("The password is incorrect") 
@@ -62,7 +88,7 @@ app.post('/register',(req,res)=>{
     .then(hash =>{
         console.log({name,email,password: hash})
         UserModel.create({name,email,password: hash})
-        .then(user => res.json(user))
+        .then(user => res.json({status: "OK"}))
         .catch(err => res.json(err))
     }).catch(err => console.log(err.message))
 })
