@@ -8,6 +8,10 @@ const jwt  = require('jsonwebtoken')
 const cookieParser = require('cookie-parser')
 
 app.use(express.json());
+
+// router added here
+app.use('/', require('./routes/index'));
+
 app.use(cors({
     origin: ["http://localhost:5173"],
     methods: ["GET", "POST", "PUT", "DELETE"],
@@ -52,54 +56,11 @@ const verifyUserForDashboard = (req, res, next) =>{
     }
 }
 
-app.get('/home', verifyUser, (req,res) => {
-     return res.json("Success")
-})
+// get/post API code is moved to router -> controller
 
-app.get('/dashboard', verifyUserForDashboard, (req,res) => {
-    return res.json("Success")
-})
- 
-app.post('/login', (req,res)=>{
-     const {email,password} = req.body;
-     UserModel.findOne({email: email})
-     .then(user => {
-            if(user){
-                bcrypt.compare(password, user.password, (err,response) =>{
-                if(response){
-                    const token = jwt.sign({email: user.email, userId: user.userId, role: user.role}, "jwt-secret-key", {expiresIn: "1d"})
-                    res.cookie("token", token);
-                    return res.json({Status: "Success", role: user.role})
-                }
-                else{
-                    res.json("The password is incorrect") 
-                }
-            })
-            
-        }  else{
-                res.json("No record existed")
-        }
-    })
-})
+//DB code moved to config 
 
-app.post('/register',(req,res)=>{
-    const {name,email,password} = req.body;
-    bcrypt.hash(password,10)
-    .then(hash =>{
-        console.log({name,email,password: hash})
-        UserModel.create({name,email,password: hash})
-        .then(user => res.json({status: "OK"}))
-        .catch(err => res.json(err))
-    }).catch(err => console.log(err.message))
-})
-
-
-mongoose.set("strictQuery",false)
-mongoose.
-connect('mongodb+srv://admin:12345@onlinejudge.uowjlcz.mongodb.net/OnlineJudge?retryWrites=true&w=majority')
-.then(()=> {
-    app.listen(3000, ()=>{
-        console.log('server is running')
-    })}).catch((error)  => {
-    console.log(error)
+app.listen(3000, (err)=>{
+	if(err){console.log(`error in running in 3000`)}
+	console.log(`app running on port 3000`);
 })
